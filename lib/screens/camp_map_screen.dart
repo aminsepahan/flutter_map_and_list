@@ -37,14 +37,13 @@ class CampMapScreen extends ConsumerStatefulWidget {
 
 class _CampMapScreenState extends ConsumerState<CampMapScreen> {
   Set<Marker> _markers = {};
-  final Completer<GoogleMapController> _completer = Completer();
-  gmc.ClusterManager? _clusterManager;
+  final _completer = Completer<GoogleMapController>();
+  gmc.ClusterManager<CampItemMarker>? _clusterManager;
 
   @override
   void initState() {
     super.initState();
     _requestLocationPermission();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(campsitesProvider.notifier).state = widget.campsites;
       _initCluster();
@@ -52,23 +51,16 @@ class _CampMapScreenState extends ConsumerState<CampMapScreen> {
   }
 
   void _initCluster() {
-    final clusterItems = ref.read(clusterItemsProvider);
-
+    final items = ref.read(clusterItemsProvider);
     _clusterManager = gmc.ClusterManager<CampItemMarker>(
-      clusterItems as Iterable<gmc.ClusterItem<CampItemMarker>>,
+      items,
       _updateMarkers,
-      markerBuilder: (dynamic cluster)
-      => _markerBuilder(cluster as gmc.Cluster<CampItemMarker>),
-
+      markerBuilder: (dynamic c) => _markerBuilder(c as gmc.Cluster<CampItemMarker>),
       stopClusteringZoom: 17,
     );
   }
 
-  void _updateMarkers(Set<Marker> markers) {
-    setState(() {
-      _markers = markers;
-    });
-  }
+  void _updateMarkers(Set<Marker> markers) => setState(() => _markers = markers);
 
   Future<Marker> _markerBuilder(gmc.Cluster<CampItemMarker> cluster) async {
     return Marker(
@@ -82,31 +74,37 @@ class _CampMapScreenState extends ConsumerState<CampMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Campsites Map')),
-      body: GoogleMap(
-        onMapCreated: _onMapCreated,
-        onCameraMove: _clusterManager?.onCameraMove,
-        onCameraIdle: _clusterManager?.updateMap,
-        myLocationEnabled: true,
-        myLocationButtonEnabled: true,
-        initialCameraPosition: CameraPosition(
-          target: LatLng(
-            widget.selectedCampSite.geoLocation.lat,
-            widget.selectedCampSite.geoLocation.long,
-          ),
-          zoom: 14,
+    return GoogleMap(
+      onMapCreated: _onMapCreated,
+      onCameraMove: _clusterManager?.onCameraMove,
+      onCameraIdle: _clusterManager?.updateMap,
+      initialCameraPosition: CameraPosition(
+        target: LatLng(
+          widget.selectedCampSite.geoLocation.lat,
+          widget.selectedCampSite.geoLocation.long,
         ),
-        markers: _markers,
-        mapType: MapType.normal,
+        zoom: 14,
       ),
+      markers: _markers,
+      myLocationEnabled: true,
+      myLocationButtonEnabled: true,
     );
   }
 
   void _onMapCreated(GoogleMapController controller) {
     _completer.complete(controller);
-  }
 
+    // trigger initial cluster pass
+    final pos = CameraPosition(
+      target: LatLng(
+        widget.selectedCampSite.geoLocation.lat,
+        widget.selectedCampSite.geoLocation.long,
+      ),
+      zoom: 14,
+    );
+    _clusterManager?.onCameraMove(pos);
+    _clusterManager?.updateMap();
+  }
   Future<void> _requestLocationPermission() async {
     var status = await Permission.location.status;
     if (!status.isGranted) {
@@ -116,4 +114,6 @@ class _CampMapScreenState extends ConsumerState<CampMapScreen> {
       }
     }
   }
+
 }
+
