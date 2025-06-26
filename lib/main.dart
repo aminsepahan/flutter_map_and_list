@@ -15,7 +15,9 @@ import 'models/camp_item_marker.dart';
 
 void setupDependencies() {
   GetIt.I.registerLazySingleton(() => DioProvider());
-  GetIt.I.registerLazySingleton(() => DioCaller(dio: GetIt.I<DioProvider>().provideDio()));
+  GetIt.I.registerLazySingleton(
+    () => DioCaller(dio: GetIt.I<DioProvider>().provideDio()),
+  );
 }
 
 void main() {
@@ -32,9 +34,7 @@ class MyApp extends StatelessWidget {
       create: (_) => CampListBloc(CampListRepository()),
       child: MaterialApp(
         title: 'Flutter Camping App',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
+        theme: ThemeData(primarySwatch: Colors.blue),
         home: const MyHomePage(title: 'camping'),
       ),
     );
@@ -50,10 +50,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-enum PriceSortOrder {
-  lowToHigh,
-  highToLow,
-}
+enum PriceSortOrder { lowToHigh, highToLow }
 
 class _MyHomePageState extends State<MyHomePage> {
   List<CampSite> allCamps = [];
@@ -74,9 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(title: Text(widget.title)),
       body: BlocConsumer<CampListBloc, CampListState>(
         builder: (context, state) {
           if (state is CampListStateSuccess) {
@@ -152,18 +147,14 @@ class _MyHomePageState extends State<MyHomePage> {
                           onTap: () {
                             navigateToMap(filteredCamps[index]);
                           },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: CampItem(
-                                  camp: filteredCamps[index],
-                                ),
-                              )
-                            ],
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              16.0,
+                              4.0,
+                              16.0,
+                              4.0,
+                            ),
+                            child: CampItem(camp: filteredCamps[index]),
                           ),
                         ),
                       );
@@ -173,10 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             );
           } else {
-            return const Text(
-              'loading',
-              style: TextStyle(fontSize: 20),
-            );
+            return const Text('loading', style: TextStyle(fontSize: 20));
           }
         },
         listener: (context, state) {
@@ -218,8 +206,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void applyFilters(bool filterOnlyCloseToWater) {
     setState(() {
       filteredCamps = allCamps;
-      filteredCamps =
-          filterOnlyCloseToWater ? filteredCamps.where((camp) => camp.isCloseToWater).toList() : filteredCamps;
+      filteredCamps = filterOnlyCloseToWater
+          ? filteredCamps.where((camp) => camp.isCloseToWater).toList()
+          : filteredCamps;
     });
   }
 
@@ -227,30 +216,29 @@ class _MyHomePageState extends State<MyHomePage> {
     // 1) Convert all CampSite into CampItemMarker
     final campItemMarkers = allCamps.map((camp) {
       return CampItemMarker(
-          id: camp.id.toString(),
-          label: camp.label,
-          lat: camp.geoLocation.lat,
-          lng: camp.geoLocation.long
+        id: camp.id.toString(),
+        label: camp.label,
+        lat: camp.geoLocation.lat,
+        lng: camp.geoLocation.long,
       );
     }).toList();
 
     // 2) Convert the single selected CampSite
     final selectedMarker = CampItemMarker(
-        id: selectedCamp.id.toString(),
-        label: selectedCamp.label,
-        lat: selectedCamp.geoLocation.lat,
-        lng: selectedCamp.geoLocation.long
+      id: selectedCamp.id.toString(),
+      label: selectedCamp.label,
+      lat: selectedCamp.geoLocation.lat,
+      lng: selectedCamp.geoLocation.long,
     );
 
     // 3) Push the map screen with the correct types
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            CampMapScreen(
-              campItems: campItemMarkers,
-              selectedCamp: selectedMarker,
-            ),
+        builder: (_) => CampMapScreen(
+          campItems: campItemMarkers,
+          selectedCamp: selectedMarker,
+        ),
       ),
     );
   }
