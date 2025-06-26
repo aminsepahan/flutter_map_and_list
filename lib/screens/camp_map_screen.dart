@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart' as gmc;
+import 'package:google_maps_cluster_manager_2/google_maps_cluster_manager_2.dart' as gmc;
 import 'package:road_surfer_task/models/camp_item_marker.dart';
 import 'package:road_surfer_task/models/camp_site.dart';
 
@@ -62,7 +62,7 @@ class _CampMapScreenState extends State<CampMapScreen> {
       position: cluster.location,
       infoWindow: cluster.isMultiple
           ? InfoWindow(title: 'Number of camps: ${cluster.count}')
-          : InfoWindow(title: cluster.items.first?.label),
+          : InfoWindow(title: cluster.items.first.label),
     );
   }
 
@@ -90,7 +90,7 @@ class _CampMapScreenState extends State<CampMapScreen> {
 
   void _onMapCreated(GoogleMapController controller) {
     _completer.complete(controller);
-
+    _clusterManager.setMapId(controller.mapId);
     // kick off an initial clustering pass
     final pos = CameraPosition(
       target: LatLng(

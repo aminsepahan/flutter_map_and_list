@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:road_surfer_task/bloc/camp_list_event.dart';
 import 'package:road_surfer_task/bloc/camp_list_state.dart';
 import 'package:bloc/bloc.dart';
@@ -9,7 +7,6 @@ import 'package:road_surfer_task/utils/GeoFixerGermany.dart';
 
 import '../configs/strings.dart';
 import '../resources/network/camp_list_repository.dart';
-import 'camp_list_event.dart';
 
 class CampListBloc extends Bloc<CampListEvent, CampListState> {
   final CampListRepository campListRepository;
@@ -31,7 +28,10 @@ class CampListBloc extends Bloc<CampListEvent, CampListState> {
       if (apiResponse.status == Status.COMPLETED) {
         final List<CampSite> response =
         (apiResponse.data as List).map((item) => CampSite.fromJson(item)).toList();
-        yield CampListStateSuccess(response.mapAndScaleToGermany());
+        final scaled = response.mapAndScaleToGermany();
+        print(scaled.first.geoLocation.lat);
+        print(response.first.geoLocation.lat);
+        yield CampListStateSuccess(scaled);
       } else if (apiResponse.status == Status.ERROR) {
         yield CampListStateFailed(apiResponse.apiError!.message);
       }
