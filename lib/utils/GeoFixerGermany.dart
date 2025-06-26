@@ -4,7 +4,7 @@ import '../models/camp_site.dart';
 
 // Germany as a Box
 const double _targetLatMin = 47.27;   // southernmost point
-const double _targetLatMax = 55.06;   // northernmost point
+const double _targetLatMax = 53.54;   // northernmost point
 const double _targetLngMin = 5.87;    // westernmost point
 const double _targetLngMax = 15.04;   // easternmost point
 

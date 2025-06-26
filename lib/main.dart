@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:road_surfer_task/bloc/camp_list_bloc.dart';
 import 'package:road_surfer_task/bloc/camp_list_event.dart';
 import 'package:road_surfer_task/bloc/camp_list_state.dart';
@@ -7,10 +10,8 @@ import 'package:road_surfer_task/screens/camp_item.dart';
 import 'package:road_surfer_task/screens/camp_map_screen.dart';
 import 'package:road_surfer_task/utils/network/dio_caller.dart';
 import 'package:road_surfer_task/utils/network/dio_provider.dart';
-import 'package:flutter/material.dart';
 
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
+import 'models/camp_item_marker.dart';
 
 void setupDependencies() {
   GetIt.I.registerLazySingleton(() => DioProvider());
@@ -223,12 +224,34 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   navigateToMap(CampSite selectedCamp) {
+    // 1) Convert all CampSite into CampItemMarker
+    final campItemMarkers = allCamps.map((camp) {
+      return CampItemMarker(
+          id: camp.id.toString(),
+          label: camp.label,
+          lat: camp.geoLocation.lat,
+          lng: camp.geoLocation.long
+      );
+    }).toList();
+
+    // 2) Convert the single selected CampSite
+    final selectedMarker = CampItemMarker(
+        id: selectedCamp.id.toString(),
+        label: selectedCamp.label,
+        lat: selectedCamp.geoLocation.lat,
+        lng: selectedCamp.geoLocation.long
+    );
+
+    // 3) Push the map screen with the correct types
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CampMapScreen(campsites: allCamps, selectedCampSite: selectedCamp),
+        builder: (_) =>
+            CampMapScreen(
+              campItems: campItemMarkers,
+              selectedCamp: selectedMarker,
+            ),
       ),
     );
-
   }
 }
