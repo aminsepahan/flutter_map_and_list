@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'camp_item_marker.dart';
+
 class CampSite {
   final String id;
   final String label;
@@ -41,6 +43,17 @@ class GeoLocation {
     return GeoLocation(
       lat: json['lat'],
       long: json['long'],
+    );
+  }
+}
+
+extension CampSiteToMarker on CampSite {
+  CampItemMarker toCampItemMarker() {
+    return CampItemMarker(
+      id: id.toString(),
+      label: label,
+      lat: geoLocation.lat,
+      lng: geoLocation.long
     );
   }
 }
