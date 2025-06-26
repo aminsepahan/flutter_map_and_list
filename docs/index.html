@@ -2,23 +2,15 @@
 <html lang="en">
 <head>
   <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
+    Absolute base href is required for dart2js:
+    * When serving from the root of a domain, use "/"
+    * When serving from a sub-path (e.g. a project page), use "/<repo-name>/"
   -->
-  <base href="/">
+  <base href="/flutter_map_and_list/">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="A Flutter web project.">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -31,11 +23,14 @@
 
   <title>road_surfer_task</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Google Maps JS API: replace with your own key -->
   <script
-          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVbuJGaOC5lt2vutKFYAipJ2pKuJV_S9U">
-  </script>
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVbuJGaOC5lt2vutKFYAipJ2pKuJV_S9U"
+          defer
+  ></script>
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+<script src="flutter_bootstrap.js" defer></script>
 </body>
 </html>
