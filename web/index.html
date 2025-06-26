@@ -1,16 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!--
-    Absolute base href is required for dart2js:
-    * When serving from the root of a domain, use "/"
-    * When serving from a sub-path (e.g. a project page), use "/<repo-name>/"
-  -->
+  <!-- MUST be exactly this for `--base-href` to work: -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A Flutter web project.">
+  <meta name="description" content="Road Surfer Task">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -24,7 +20,6 @@
   <title>road_surfer_task</title>
   <link rel="manifest" href="manifest.json">
 
-  <!-- Google Maps JS API: replace with your own key -->
   <script
           src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVbuJGaOC5lt2vutKFYAipJ2pKuJV_S9U"
           defer
