@@ -52,15 +52,22 @@ class CampItem extends StatelessWidget {
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  camp.isCloseToWater ? 'Near water 💧' : 'Not near water',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: camp.isCloseToWater
-                        ? Colors.blueAccent
-                        : Colors.grey,
-                  ),
-                ),
+                Row(
+                  children: [
+                    Text(
+                      camp.isCloseToWater ? ' 🌊 ' : ' 🏜 ',
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      camp.isCampFireAllowed ? ' 🔥 ' : ' 🚒 ',
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                )
               ],
             ),
           ),
