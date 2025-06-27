@@ -21,6 +21,7 @@ enum SortOption { popularity, lowToHigh, highToLow }
 
 class HomeScreen extends StatefulWidget {
   final List<CampSite> allCamps;
+
   const HomeScreen({Key? key, required this.allCamps}) : super(key: key);
 
   @override
@@ -96,10 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      CampListView(
-        camps: _filteredCamps,
-        onCampTap: _onCampTap,
-      ),
+      CampListView(camps: _filteredCamps, onCampTap: _onCampTap),
       CampMapScreen(
         campItems: _filteredCamps.map((c) => c.toMarker()).toList(),
         selectedCamp: _selectedCamp?.toMarker(),
@@ -110,82 +108,99 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(title: const Text('Campus Explorer')),
       body: Column(
         children: [
-          // Row for label filter and sort
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            child: Row(
+          // Filter & sort bar with elevation shadow
+          Material(
+            elevation: 4,
+            shadowColor: Colors.black45,
+            child: Column(
               children: [
-                Expanded(
-                  flex: 2,
-                  child: DropdownButton<String>(
-                    value: _selectedLabel,
-                    items: _labels
-                        .map((label) => DropdownMenuItem(
-                      value: label,
-                      child: Text(label),
-                    ))
-                        .toList(),
-                    onChanged: _onLabelChanged,
-                    isExpanded: true,
+                // Row for label filter and sort
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 4.0,
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  flex: 2,
-                  child: DropdownButton<SortOption>(
-                    value: _sortOption,
-                    items: const [
-                      DropdownMenuItem(
-                        value: SortOption.popularity,
-                        child: Text('Popularity'),
-                      ),
-                      DropdownMenuItem(
-                        value: SortOption.lowToHigh,
-                        child: Text('Price: Low → High'),
-                      ),
-                      DropdownMenuItem(
-                        value: SortOption.highToLow,
-                        child: Text('Price: High → Low'),
-                      ),
-                    ],
-                    onChanged: _onSortChanged,
-                    isExpanded: true,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Row for switches: close to water and fire allowed
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            child: Row(
-              children: [
-                Expanded(
                   child: Row(
                     children: [
-                      const Text('Close to water'),
-                      const SizedBox(width: 4),
-                      Switch(
-                        value: _onlyCloseToWater,
-                        onChanged: (val) {
-                          setState(() => _onlyCloseToWater = val);
-                          _applyFilterAndSort();
-                        },
+                      Expanded(
+                        flex: 2,
+                        child: DropdownButton<String>(
+                          value: _selectedLabel,
+                          items: _labels
+                              .map(
+                                (label) => DropdownMenuItem(
+                                  value: label,
+                                  child: Text(label),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: _onLabelChanged,
+                          isExpanded: true,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 2,
+                        child: DropdownButton<SortOption>(
+                          value: _sortOption,
+                          items: const [
+                            DropdownMenuItem(
+                              value: SortOption.popularity,
+                              child: Text('Popularity'),
+                            ),
+                            DropdownMenuItem(
+                              value: SortOption.lowToHigh,
+                              child: Text('Price: Low → High'),
+                            ),
+                            DropdownMenuItem(
+                              value: SortOption.highToLow,
+                              child: Text('Price: High → Low'),
+                            ),
+                          ],
+                          onChanged: _onSortChanged,
+                          isExpanded: true,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                Expanded(
+                // Row for switches: close to water and fire allowed
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 4.0,
+                  ),
                   child: Row(
                     children: [
-                      const Text('Fire allowed'),
-                      const SizedBox(width: 4),
-                      Switch(
-                        value: _fireAllowed,
-                        onChanged: (val) {
-                          setState(() => _fireAllowed = val);
-                          _applyFilterAndSort();
-                        },
+                      Expanded(
+                        child: Row(
+                          children: [
+                            const Text('Close to water'),
+                            const SizedBox(width: 4),
+                            Switch(
+                              value: _onlyCloseToWater,
+                              onChanged: (val) {
+                                setState(() => _onlyCloseToWater = val);
+                                _applyFilterAndSort();
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            const Text('Fire allowed'),
+                            const SizedBox(width: 4),
+                            Switch(
+                              value: _fireAllowed,
+                              onChanged: (val) {
+                                setState(() => _fireAllowed = val);
+                                _applyFilterAndSort();
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -205,14 +220,8 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'List',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'List'),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
         ],
       ),
     );
