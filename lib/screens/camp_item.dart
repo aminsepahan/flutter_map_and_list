@@ -57,13 +57,13 @@ class CampItem extends StatelessWidget {
                     Text(
                       camp.isCloseToWater ? ' 🌊 ' : ' 🏜 ',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 30,
                       ),
                     ),
                     Text(
-                      camp.isCampFireAllowed ? ' 🔥 ' : ' 🚒 ',
+                      camp.isCampFireAllowed ? '  🔥 ' : '  🚒 ',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 30,
                       ),
                     ),
                   ],
