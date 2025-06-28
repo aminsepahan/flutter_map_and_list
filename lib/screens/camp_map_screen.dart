@@ -1,5 +1,6 @@
+// lib/screens/camp_map_screen.dart
+
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -21,7 +22,8 @@ class CampMapScreen extends StatefulWidget {
 }
 
 class _CampMapScreenState extends State<CampMapScreen> {
-  final Completer<GoogleMapController> _mapController = Completer();
+  final Completer<GoogleMapController> _mapControllerCompleter = Completer();
+  late GoogleMapController _gmapController;
   late final gmc.ClusterManager<CampItemMarker> _clusterManager;
   Set<Marker> _markers = {};
 
@@ -32,9 +34,16 @@ class _CampMapScreenState extends State<CampMapScreen> {
       widget.campItems,
       _updateMarkers,
       markerBuilder: _markerBuilder,
-      levels: [1, 5, 10, 15, 20],
-      extraPercent: 0.2,
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant CampMapScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.campItems != oldWidget.campItems) {
+      _clusterManager.setItems(widget.campItems);
+      _clusterManager.updateMap();
+    }
   }
 
   void _updateMarkers(Set<Marker> markers) {
@@ -42,9 +51,9 @@ class _CampMapScreenState extends State<CampMapScreen> {
   }
 
   Future<void> _onMapCreated(GoogleMapController controller) async {
-    _mapController.complete(controller);
+    _mapControllerCompleter.complete(controller);
+    _gmapController = controller;
     _clusterManager.setMapId(controller.mapId);
-    // Center on selected camp if provided
     if (widget.selectedCamp != null) {
       await controller.animateCamera(
         CameraUpdate.newLatLngZoom(widget.selectedCamp!.latLng, 15),
@@ -61,13 +70,57 @@ class _CampMapScreenState extends State<CampMapScreen> {
     _clusterManager.updateMap();
   }
 
-  /// Generates a circular cluster icon displaying the count
+  Future<Marker> _markerBuilder(gmc.Cluster<CampItemMarker> cluster) async {
+    if (cluster.isMultiple) {
+      final icon = await _createClusterBitmap(cluster.count);
+      return Marker(
+        markerId: MarkerId(cluster.getId()),
+        position: cluster.location,
+        icon: icon,
+        onTap: () async {
+          final zoom = await _gmapController.getZoomLevel();
+          _gmapController.animateCamera(
+            CameraUpdate.newLatLngZoom(cluster.location, zoom + 1),
+          );
+        },
+        infoWindow: InfoWindow(title: '${cluster.count} items'),
+      );
+    } else {
+      final item = cluster.items.first;
+      final bool isSelected = widget.selectedCamp?.id == item.id;
+      final icon = await _createSingleMarkerBitmap(
+        isSelected ? BitmapDescriptor.hueGreen : null,
+      );
+      return Marker(
+        markerId: MarkerId(item.id),
+        position: item.latLng,
+        icon: icon,
+        infoWindow: InfoWindow(
+          title: item.label,
+          snippet: isSelected ? 'Selected Campus' : null,
+        ),
+      );
+    }
+  }
+
+  Future<BitmapDescriptor> _createSingleMarkerBitmap(double? hue) async {
+    if (hue != null) {
+      // keep the green highlight for selected pins
+      return BitmapDescriptor.defaultMarkerWithHue(hue);
+    }
+    // Non‐selected: use your custom PNG
+    return await BitmapDescriptor.asset(
+      const ImageConfiguration(size: Size(48, 48)),
+      'assets/images/tent.png',
+    );
+  }
+
   Future<BitmapDescriptor> _createClusterBitmap(int count) async {
     const int size = 100;
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-    final Paint paint = Paint()..color = Colors.blue;
-    final double radius = size / 2;
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final paint = Paint()..color = Color(0xFF68B4A8);
+    final radius = size / 2;
     canvas.drawCircle(Offset(radius, radius), radius, paint);
 
     final textPainter = TextPainter(
@@ -88,38 +141,9 @@ class _CampMapScreenState extends State<CampMapScreen> {
       Offset((size - textPainter.width) / 2, (size - textPainter.height) / 2),
     );
 
-    final ui.Image image = await recorder.endRecording().toImage(size, size);
-    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    return BitmapDescriptor.bytes(byteData!.buffer.asUint8List());
-  }
-
-  /// Custom marker builder that highlights the selected camp
-  Future<Marker> _markerBuilder(gmc.Cluster<CampItemMarker> cluster) async {
-    if (cluster.isMultiple) {
-      final icon = await _createClusterBitmap(cluster.count);
-      return Marker(
-        markerId: MarkerId(cluster.getId()),
-        position: cluster.location,
-        icon: icon,
-        infoWindow: InfoWindow(
-          title: '${cluster.count} campuses',
-        ),
-      );
-    } else {
-      final item = cluster.items.first;
-      final bool isSelected = widget.selectedCamp?.id == item.id;
-      return Marker(
-        markerId: MarkerId(item.id),
-        position: item.latLng,
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          isSelected ? BitmapDescriptor.hueGreen : BitmapDescriptor.hueBlue,
-        ),
-        infoWindow: InfoWindow(
-          title: item.label,
-          snippet: isSelected ? 'Selected Campus' : null,
-        ),
-      );
-    }
+    final image = await recorder.endRecording().toImage(size, size);
+    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    return BitmapDescriptor.bytes(bytes!.buffer.asUint8List());
   }
 
   @override
@@ -129,18 +153,15 @@ class _CampMapScreenState extends State<CampMapScreen> {
             ? widget.campItems.first.latLng
             : const LatLng(52.5200, 13.4050));
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Campus Map')),
-      body: GoogleMap(
-        initialCameraPosition: CameraPosition(
-          target: initialPosition,
-          zoom: widget.selectedCamp != null ? 15 : 10,
-        ),
-        markers: _markers,
-        onMapCreated: _onMapCreated,
-        onCameraMove: _onCameraMove,
-        onCameraIdle: _onCameraIdle,
+    return GoogleMap(
+      initialCameraPosition: CameraPosition(
+        target: initialPosition,
+        zoom: widget.selectedCamp != null ? 15 : 10,
       ),
+      markers: _markers,
+      onMapCreated: _onMapCreated,
+      onCameraMove: _onCameraMove,
+      onCameraIdle: _onCameraIdle,
     );
   }
 }
