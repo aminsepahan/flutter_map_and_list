@@ -116,7 +116,7 @@ class _CampMapScreenState extends State<CampMapScreen> {
   }
 
   Future<BitmapDescriptor> _createClusterBitmap(int count) async {
-    const int size = 100;
+    const int size = 40;
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
     final paint = Paint()..color = Color(0xFF68B4A8);
@@ -127,7 +127,7 @@ class _CampMapScreenState extends State<CampMapScreen> {
       text: TextSpan(
         text: count.toString(),
         style: const TextStyle(
-          fontSize: 40,
+          fontSize: 20,
           color: Colors.white,
           fontWeight: FontWeight.bold,
         ),
